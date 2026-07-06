@@ -1,0 +1,11 @@
+{
+  "name": "file-converter",
+  "version": "1.0.0",
+  "description": "Monorepo with Angular 21 frontend and Golang WebAssembly (WASM) backend",
+  "scripts": {
+    "build:wasm": "GOOS=js GOARCH=wasm go build -o frontend/src/assets/wasm/converter.wasm go-wasm/main.go && cp $(go env GOROOT)/misc/wasm/wasm_exec.js frontend/src/assets/wasm/",
+    "build": "npm run build:wasm && npm --prefix frontend run build",
+    "start": "npm run build:wasm && npm --prefix frontend start"
+  },
+  "private": true
+}
