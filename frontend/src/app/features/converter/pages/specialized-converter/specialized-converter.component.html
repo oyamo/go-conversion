@@ -1,0 +1,118 @@
+<div class="bg-decoration"></div>
+
+<!-- Title Section -->
+<div class="title-section">
+  <h1 class="page-title">{{ fromFormat().toUpperCase() }} to {{ toFormat().toUpperCase() }}</h1>
+  <p class="page-subtitle">Convert your {{ fromFormat().toUpperCase() }} files to {{ toFormat().toUpperCase() }} format securely in the browser.</p>
+</div>
+
+<!-- Main Workspace Card -->
+<div class="workspace-card" [class.compact]="files().length > 0">
+  <!-- Specialized Upload Interface (if no files are active) -->
+  <div *ngIf="files().length === 0" class="specialized-upload-area">
+    
+    <!-- Icons Display (Shows source format converting to destination format) -->
+    <div class="icons-comparison">
+      <!-- From Icon -->
+      <div class="format-large-icon" [ngClass]="getIconClass(fromFormat())">
+        <span class="ext-badge">{{ fromFormat().toUpperCase() }}</span>
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+      </div>
+
+      <!-- Arrow -->
+      <div class="arrow-indicator">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </div>
+
+      <!-- To Icon -->
+      <div class="format-large-icon" [ngClass]="getIconClass(toFormat())">
+        <span class="ext-badge">{{ toFormat().toUpperCase() }}</span>
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+      </div>
+    </div>
+
+    <div class="action-description">
+      <h3>Select a {{ fromFormat().toUpperCase() }} file to convert</h3>
+      <p>The file will be automatically set to convert to {{ toFormat().toUpperCase() }}.</p>
+    </div>
+
+    <!-- Hidden input for file selection -->
+    <input 
+      #fileInput 
+      type="file" 
+      [accept]="'.' + fromFormat()"
+      multiple
+      class="hidden-input" 
+      (change)="onFileSelected($event)"
+    />
+
+    <button class="btn btn-primary btn-large" (click)="fileInput.click()">
+      Select {{ fromFormat().toUpperCase() }} File
+    </button>
+  </div>
+
+  <!-- File Conversion list (redirects workflow through ConverterService) -->
+  <div *ngIf="files().length > 0" class="active-workspace">
+    <div class="file-list-container">
+      <app-file-card 
+        *ngFor="let file of files()" 
+        [file]="file"
+        (targetFormatChanged)="onTargetFormatChanged($event)"
+        (removeFile)="onRemoveFile($event)">
+      </app-file-card>
+    </div>
+
+    <div class="workspace-footer">
+      <input 
+        #addMoreInput 
+        type="file" 
+        [accept]="'.' + fromFormat()"
+        multiple 
+        class="hidden-input" 
+        (change)="onAddMoreFiles($event)"
+      />
+
+      <div class="control-panel" [ngSwitch]="state()">
+        <div *ngSwitchCase="'selected'" class="btn-group">
+          <button class="btn btn-outline" (click)="addMoreInput.click()">
+            Add More {{ fromFormat().toUpperCase() }} Files
+          </button>
+          <button class="btn btn-primary" (click)="onConvertClick()">
+            Convert to {{ toFormat().toUpperCase() }}
+          </button>
+        </div>
+
+        <div *ngSwitchCase="'uploading'" class="btn-group disabled-state">
+          <button class="btn btn-outline" disabled>Add More Files</button>
+          <button class="btn btn-primary" disabled>
+            Uploading...
+            <div class="spinner"></div>
+          </button>
+        </div>
+
+        <div *ngSwitchCase="'converting'" class="btn-group disabled-state">
+          <button class="btn btn-outline" disabled>Add More Files</button>
+          <button class="btn btn-primary" disabled>
+            Converting...
+            <div class="spinner"></div>
+          </button>
+        </div>
+
+        <div *ngSwitchCase="'completed'" class="btn-group center-group">
+          <button class="btn btn-primary" (click)="onConvertMoreClick()">
+            Convert More Files
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,87 @@
+<div class="bg-decoration"></div>
+
+<!-- Title Section -->
+<div class="title-section">
+  <h1 class="page-title">{{ getTitle() }}</h1>
+  <p class="page-subtitle">{{ getSubtitle() }}</p>
+</div>
+
+<!-- Main Workspace Card -->
+<div class="workspace-card" [class.compact]="state() !== 'idle'">
+  <!-- IDLE STATE -->
+  <app-dropzone 
+    *ngIf="state() === 'idle'" 
+    (filesSelected)="onFilesSelected($event)">
+  </app-dropzone>
+
+  <!-- ACTIVE STATES (Selected, Uploading, Converting, Completed) -->
+  <div *ngIf="state() !== 'idle'" class="active-workspace">
+    <div class="file-list-container">
+      <app-file-card 
+        *ngFor="let file of files()" 
+        [file]="file"
+        (targetFormatChanged)="onTargetFormatChanged($event)"
+        (removeFile)="onRemoveFile($event)">
+      </app-file-card>
+    </div>
+
+    <!-- Footer Control Actions inside Card -->
+    <div class="workspace-footer">
+      <!-- Hidden file input for "Add More" -->
+      <input 
+        #addMoreInput 
+        type="file" 
+        multiple 
+        class="hidden-input" 
+        (change)="onAddMoreFiles($event)"
+      />
+
+      <!-- Control Panel based on State -->
+      <div class="control-panel" [ngSwitch]="state()">
+        <!-- Selected State Controls -->
+        <div *ngSwitchCase="'selected'" class="btn-group">
+          <button class="btn btn-outline" (click)="addMoreInput.click()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add More Files
+          </button>
+          <button class="btn btn-primary btn-large" (click)="onConvertClick()">
+            Convert Now
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Progress/Busy State Controls -->
+        <div *ngSwitchCase="'uploading'" class="btn-group disabled-state">
+          <button class="btn btn-outline" disabled>Add More Files</button>
+          <button class="btn btn-primary" disabled>
+            Uploading...
+            <div class="spinner"></div>
+          </button>
+        </div>
+
+        <div *ngSwitchCase="'converting'" class="btn-group disabled-state">
+          <button class="btn btn-outline" disabled>Add More Files</button>
+          <button class="btn btn-primary" disabled>
+            Converting...
+            <div class="spinner"></div>
+          </button>
+        </div>
+
+        <!-- Completed State Controls -->
+        <div *ngSwitchCase="'completed'" class="btn-group center-group">
+          <button class="btn btn-primary btn-large" (click)="onConvertMoreClick()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+            </svg>
+            Convert More Files
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,159 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.title-section {
+  margin-bottom: 0.5rem;
+  z-index: 10;
+}
+
+.workspace-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: var(--card-border);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  width: 100%;
+  max-width: 800px;
+  min-height: 400px;
+  padding: 3rem;
+  transition: all var(--transition-normal);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.workspace-card.compact {
+  padding: 2rem;
+  min-height: auto;
+  align-items: stretch;
+}
+
+.specialized-upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+}
+
+.icons-comparison {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.arrow-indicator {
+  color: var(--text-light);
+}
+
+/* Icon styling mapping from FileCard */
+.format-large-icon {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.ext-badge {
+  position: absolute;
+  bottom: 12px;
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.icon-pdf { background-color: #fef2f2; color: #ef4444; }
+.icon-doc { background-color: #eff6ff; color: #3b82f6; }
+.icon-xls { background-color: #ecfdf5; color: #10b981; }
+.icon-img { background-color: #faf5ff; color: #a855f7; }
+.icon-generic { background-color: #f8fafc; color: #64748b; }
+
+.action-description {
+  margin-bottom: 2rem;
+}
+
+.action-description h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.action-description p {
+  font-size: 0.9rem;
+  color: var(--text-medium);
+}
+
+.hidden-input {
+  display: none;
+}
+
+.btn-large {
+  padding: 0.85rem 2rem;
+  font-size: 0.95rem;
+}
+
+/* Active workspace structures */
+.active-workspace {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.file-list-container {
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.workspace-footer {
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.5rem;
+}
+
+.control-panel {
+  width: 100%;
+}
+
+.btn-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-group.center-group {
+  justify-content: center;
+}
+
+.disabled-state {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
