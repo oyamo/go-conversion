@@ -14,7 +14,10 @@ func convertJpegToPng(data []byte) ([]byte, error) {
 	}
 
 	var buf bytes.Buffer
-	err = png.Encode(&buf, img)
+	enc := png.Encoder{
+		CompressionLevel: png.BestSpeed,
+	}
+	err = enc.Encode(&buf, img)
 	if err != nil {
 		return nil, err
 	}

@@ -14,7 +14,7 @@ func convertPngToJpeg(data []byte) ([]byte, error) {
 	}
 
 	var buf bytes.Buffer
-	err = jpeg.Encode(&buf, img, &jpeg.Options{Quality: 90})
+	err = jpeg.Encode(&buf, img, &jpeg.Options{Quality: 80})
 	if err != nil {
 		return nil, err
 	}

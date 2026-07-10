@@ -29,7 +29,7 @@ export class FormatSelectorComponent implements AfterViewInit {
     {
       id: 'document',
       name: 'Document',
-      formats: ['pdf', 'docx', 'xlsx', 'txt', 'csv']
+      formats: ['pdf', 'docx', 'xlsx', 'txt', 'csv', 'md', 'html']
     },
     {
       id: 'image',

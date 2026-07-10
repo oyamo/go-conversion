@@ -7,6 +7,7 @@ import (
 
 	"go-wasm/internal/registry"
 	
+	_ "go-wasm/internal/converters/document"
 	_ "go-wasm/internal/converters/image"
 )
 

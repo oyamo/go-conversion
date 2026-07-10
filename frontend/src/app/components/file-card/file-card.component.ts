@@ -18,13 +18,13 @@ export class FileCardComponent {
 
   public dropdownOpen = signal<boolean>(false);
 
-  public documentFormats = ['pdf', 'docx', 'xlsx', 'txt', 'csv'];
+  public documentFormats = ['pdf', 'docx', 'xlsx', 'txt', 'csv', 'md', 'html'];
   public imageFormats = ['png', 'jpg', 'gif', 'svg', 'webp'];
 
   public getFileIconClass(ext: string): string {
     const format = ext.toLowerCase();
     if (format === 'pdf') return 'icon-pdf';
-    if (['docx', 'doc', 'txt'].includes(format)) return 'icon-doc';
+    if (['docx', 'doc', 'txt', 'md', 'html'].includes(format)) return 'icon-doc';
     if (['xlsx', 'xls', 'csv'].includes(format)) return 'icon-xls';
     if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(format)) return 'icon-img';
     return 'icon-generic';
