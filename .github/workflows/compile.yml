@@ -33,7 +33,7 @@ jobs:
       - name: Compile WASM
         run: |
           cd go-wasm
-          tinygo build -o ../frontend/src/assets/wasm/converter.wasm -target=wasm ./cmd/wasm
+          tinygo build -o ../frontend/src/assets/wasm/converter.wasm -target=wasm -no-debug -opt=z ./cmd/wasm
           cp $(tinygo env TINYGOROOT)/targets/wasm_exec.js ../frontend/src/assets/wasm/
 
       - name: Upload WASM Artifacts
