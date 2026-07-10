@@ -21,10 +21,11 @@ jobs:
         with:
           go-version: '1.22'
 
-      - name: Set up TinyGo
-        uses: tinygo-org/setup-tinygo@v2
-        with:
-          tinygo-version: 'latest'
+      - name: Install TinyGo
+        run: |
+          TINYGO_VERSION=0.33.0
+          wget https://github.com/tinygo-org/tinygo/releases/download/v${TINYGO_VERSION}/tinygo_${TINYGO_VERSION}_amd64.deb
+          sudo dpkg -i tinygo_${TINYGO_VERSION}_amd64.deb || sudo apt-get install -f -y
 
       - name: Create Target Directories
         run: mkdir -p frontend/src/assets/wasm
