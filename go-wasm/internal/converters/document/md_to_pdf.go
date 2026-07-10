@@ -266,3 +266,13 @@ func convertMdToPdf(data []byte) ([]byte, error) {
 
 	return pdf.Bytes(), nil
 }
+
+func init() {
+	registry.Register(registry.Converter{
+		From:     "md",
+		To:       "pdf",
+		MIMEType: "application/pdf",
+		Label:    "Markdown to PDF",
+		Convert:  convertMdToPdf,
+	})
+}
