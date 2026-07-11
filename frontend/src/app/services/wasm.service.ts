@@ -59,12 +59,11 @@ export class WasmService {
   /**
    * Helper to invoke conversion function registered in Go WASM window context.
    */
-  public async convertFile(fileData: Uint8Array, fromFormat: string, toFormat: string): Promise<Uint8Array> {
-    // If WASM is loaded, call the Go global function (e.g. window.convertFileWasm)
+  public async convertFile(fileData: Uint8Array, fromFormat: string, toFormat: string, password?: string): Promise<Uint8Array> {
     const globalWindow = window as any;
     if (this.wasmLoaded() && typeof globalWindow.convertFileWasm === 'function') {
       try {
-        return await globalWindow.convertFileWasm(fileData, fromFormat, toFormat);
+        return await globalWindow.convertFileWasm(fileData, fromFormat, toFormat, password || '');
       } catch (err) {
         throw new Error(`Go WASM Conversion error: ${err}`);
       }

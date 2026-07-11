@@ -21,7 +21,22 @@ func key(from, to string) string {
 var (
 	mu         sync.RWMutex
 	converters = make(map[string]Converter)
+
+	password   string
+	passwordMu sync.RWMutex
 )
+
+func SetPassword(pass string) {
+	passwordMu.Lock()
+	password = pass
+	passwordMu.Unlock()
+}
+
+func GetPassword() string {
+	passwordMu.RLock()
+	defer passwordMu.RUnlock()
+	return password
+}
 
 func Register(c Converter) error {
 	if c.From == "" || c.To == "" {

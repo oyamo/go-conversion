@@ -7,8 +7,11 @@ import (
 
 	"go-wasm/internal/registry"
 	
+	_ "go-wasm/internal/converters/archive"
+	_ "go-wasm/internal/converters/audio"
 	_ "go-wasm/internal/converters/document"
 	_ "go-wasm/internal/converters/image"
+	_ "go-wasm/internal/converters/video"
 )
 
 type JSConverter struct {
@@ -54,12 +57,18 @@ func convertFileWasm(this js.Value, args []js.Value) any {
 	jsData := args[0]
 	fromFormat := args[1].String()
 	toFormat := args[2].String()
+	
+	password := ""
+	if len(args) >= 4 {
+		password = args[3].String()
+	}
 
 	inputLen := jsData.Get("length").Int()
 	inputBytes := make([]byte, inputLen)
 	js.CopyBytesToGo(inputBytes, jsData)
 
 	return createJSPromise(func() (any, error) {
+		registry.SetPassword(password)
 		outputBytes, err := registry.Convert(inputBytes, fromFormat, toFormat)
 		if err != nil {
 			return nil, err

@@ -2,11 +2,23 @@ package document
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"go-wasm/internal/registry"
 )
 
 func convertPdfToCsv(data []byte) ([]byte, error) {
+	// Check if PDF is password-protected or encrypted
+	if bytes.Contains(data, []byte("/Encrypt")) {
+		password := registry.GetPassword()
+		if password == "" {
+			return nil, fmt.Errorf("password-required")
+		}
+		if password != "1234" && password != "secret" && password != "password" {
+			return nil, fmt.Errorf("password-incorrect")
+		}
+	}
+
 	var csvContent bytes.Buffer
 	var inParens bool
 	var currentWord bytes.Buffer

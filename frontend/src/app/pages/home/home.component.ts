@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ConverterService } from '../../services/converter.service';
 import { DropzoneComponent } from '../../components/dropzone/dropzone.component';
 import { FileCardComponent } from '../../components/file-card/file-card.component';
+import { PasswordModalComponent } from '../../components/password-modal/password-modal.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, DropzoneComponent, FileCardComponent],
+  imports: [CommonModule, DropzoneComponent, FileCardComponent, PasswordModalComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })

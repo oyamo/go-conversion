@@ -9,6 +9,13 @@ export class ConverterService {
   // State signal: list of files
   public files = signal<ConvertedFile[]>([]);
   
+  public passwordPrompt = signal<{
+    show: boolean;
+    error: boolean;
+    resolve: (password: string) => void;
+    reject: (err: Error) => void;
+  } | null>(null);
+  
   // App state computed based on files and their current status
   public appState = computed<AppState>(() => {
     const list = this.files();
@@ -140,14 +147,47 @@ export class ConverterService {
       }, 100);
 
       // Perform conversion
-      let outputData: Uint8Array;
+      let outputData: Uint8Array = new Uint8Array();
       if (file.originalFile) {
         const fileBuffer = await file.originalFile.arrayBuffer();
         const inputData = new Uint8Array(fileBuffer);
-        outputData = await this.wasmService.convertFile(inputData, file.fromFormat, file.toFormat);
-      } else {
-        // Fallback if no file data
-        outputData = new Uint8Array();
+        
+        let attempts = 0;
+        let password = '';
+        while (attempts < 3) {
+          try {
+            outputData = await this.wasmService.convertFile(inputData, file.fromFormat, file.toFormat, password);
+            break; // Success!
+          } catch (err: any) {
+            const errMsg = err.message || '';
+            if (errMsg.includes('password-required') || errMsg.includes('password-incorrect')) {
+              attempts++;
+              const getPasswordFromModal = (isError: boolean): Promise<string> => {
+                return new Promise<string>((resolveModal, rejectModal) => {
+                  this.passwordPrompt.set({
+                    show: true,
+                    error: isError,
+                    resolve: (pass: string) => {
+                      this.passwordPrompt.set(null);
+                      resolveModal(pass);
+                    },
+                    reject: (err: Error) => {
+                      this.passwordPrompt.set(null);
+                      rejectModal(err);
+                    }
+                  });
+                });
+              };
+              const inputPass = await getPasswordFromModal(errMsg.includes('password-incorrect'));
+              password = inputPass;
+            } else {
+              throw err; // Other conversion error
+            }
+          }
+        }
+        if (attempts >= 3) {
+          throw new Error("Too many incorrect password attempts");
+        }
       }
 
       clearInterval(progressInterval);
