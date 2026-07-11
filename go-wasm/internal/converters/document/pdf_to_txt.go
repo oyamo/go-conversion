@@ -2,21 +2,25 @@ package document
 
 import (
 	"bytes"
-	"fmt"
+	"errors"
 	"strings"
 	"go-wasm/internal/registry"
 )
 
+var (
+	ErrPdfPasswordRequired  = errors.New("password-required")
+	ErrPdfPasswordIncorrect = errors.New("password-incorrect")
+)
+
 func convertPdfToTxt(data []byte) ([]byte, error) {
-	// Check if PDF is password-protected or encrypted
-	if bytes.Contains(data, []byte("/Encrypt")) {
-		password := registry.GetPassword()
-		if password == "" {
-			return nil, fmt.Errorf("password-required")
-		}
-		if password != "1234" && password != "secret" && password != "password" {
-			return nil, fmt.Errorf("password-incorrect")
-		}
+	isEncrypted := bytes.Contains(data, []byte("/Encrypt"))
+	password := registry.GetPassword()
+
+	if isEncrypted && password == "" {
+		return nil, ErrPdfPasswordRequired
+	}
+	if isEncrypted && password != "1234" && password != "secret" && password != "password" {
+		return nil, ErrPdfPasswordIncorrect
 	}
 
 	var txtContent bytes.Buffer

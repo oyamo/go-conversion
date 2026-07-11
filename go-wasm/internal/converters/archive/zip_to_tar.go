@@ -5,11 +5,17 @@ import (
 	"bytes"
 	"compress/flate"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"hash/crc32"
 	"io"
 	"strings"
 	"go-wasm/internal/registry"
+)
+
+var (
+	ErrZipPasswordRequired  = errors.New("password-required")
+	ErrZipPasswordIncorrect = errors.New("password-incorrect")
 )
 
 type zipCrypto struct {
@@ -112,18 +118,17 @@ func convertZipToTar(data []byte) ([]byte, error) {
 		}
 
 		fileBytes := data[dataStart:dataEnd]
+		isEncrypted := flags&1 != 0
 
-		// Decrypt if general purpose flag bit 0 is set
-		if flags&1 != 0 {
-			if password == "" {
-				return nil, fmt.Errorf("password-required")
-			}
+		if isEncrypted && password == "" {
+			return nil, ErrZipPasswordRequired
+		}
+		if isEncrypted && len(fileBytes) < 12 {
+			return nil, fmt.Errorf("corrupted encrypted file payload")
+		}
 
+		if isEncrypted {
 			zc := newZipCrypto([]byte(password))
-			if len(fileBytes) < 12 {
-				return nil, fmt.Errorf("corrupted encrypted file payload")
-			}
-
 			// Decrypt 12-byte encryption header
 			decHeader := make([]byte, 12)
 			for i := 0; i < 12; i++ {
@@ -136,10 +141,10 @@ func convertZipToTar(data []byte) ([]byte, error) {
 				checkByte = byte(modTime >> 8)
 			}
 			if decHeader[11] != checkByte {
-				return nil, fmt.Errorf("password-incorrect")
+				return nil, ErrZipPasswordIncorrect
 			}
 
-			// Decrypt remaining encrypted data payload
+			// Decrypt remaining data payload
 			encPayload := fileBytes[12:]
 			decPayload := make([]byte, len(encPayload))
 			for i := 0; i < len(encPayload); i++ {

@@ -3,54 +3,79 @@ package archive
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
 	"fmt"
+	"io"
+	"github.com/nwaples/rardecode/v2"
 	"go-wasm/internal/registry"
 )
 
+var (
+	ErrPasswordRequired  = errors.New("password-required")
+	ErrPasswordIncorrect = errors.New("password-incorrect")
+)
+
 func convertRarToZip(data []byte) ([]byte, error) {
-	if len(data) < 8 {
-		return nil, fmt.Errorf("invalid RAR archive: file too short")
-	}
-
-	// RAR4 signature: 52 61 72 21 1a 07 00
-	// RAR5 signature: 52 61 72 21 1a 07 01 00
-	isRar4 := data[0] == 0x52 && data[1] == 0x61 && data[2] == 0x72 && data[3] == 0x21 && data[4] == 0x1a && data[5] == 0x07 && data[6] == 0x00
-	isRar5 := data[0] == 0x52 && data[1] == 0x61 && data[2] == 0x72 && data[3] == 0x21 && data[4] == 0x1a && data[5] == 0x07 && data[6] == 0x01 && data[7] == 0x00
-
-	if !isRar4 && !isRar5 {
-		return nil, fmt.Errorf("invalid RAR archive signature")
-	}
-
-	isEncrypted := true 
-	
 	password := registry.GetPassword()
 
-	if isEncrypted {
-		if password == "" {
-			return nil, fmt.Errorf("password-required")
-		}
-		if password != "1234" && password != "secret" && password != "password" {
-			return nil, fmt.Errorf("password-incorrect")
-		}
+	// Initialize the RAR reader with the password option
+	rr, err := rardecode.NewReader(bytes.NewReader(data), rardecode.Password(password))
+	if errors.Is(err, rardecode.ErrArchiveEncrypted) || errors.Is(err, rardecode.ErrArchivedFileEncrypted) {
+		return nil, ErrPasswordRequired
+	}
+	if errors.Is(err, rardecode.ErrBadPassword) {
+		return nil, ErrPasswordIncorrect
+	}
+	if err != nil {
+		return nil, err
 	}
 
-	// Build a valid output ZIP containing simulated files from the RAR
 	var zipBuf bytes.Buffer
 	zw := zip.NewWriter(&zipBuf)
 
-	// Entry 1: readme.txt
-	f1, err := zw.Create("readme.txt")
-	if err != nil {
-		return nil, err
-	}
-	f1.Write([]byte("Successfully extracted from encrypted RAR archive!\n\nThis file converter runs 100% locally inside your browser via WebAssembly."))
+	for {
+		header, err := rr.Next()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if errors.Is(err, rardecode.ErrArchiveEncrypted) || errors.Is(err, rardecode.ErrArchivedFileEncrypted) {
+			return nil, ErrPasswordRequired
+		}
+		if errors.Is(err, rardecode.ErrBadPassword) {
+			return nil, ErrPasswordIncorrect
+		}
+		if err != nil {
+			return nil, err
+		}
 
-	// Entry 2: report.csv
-	f2, err := zw.Create("report.csv")
-	if err != nil {
-		return nil, err
+		// Skip directories
+		if header.IsDir {
+			continue
+		}
+
+		// Check if file is encrypted and password was not provided
+		if header.Encrypted && password == "" {
+			return nil, ErrPasswordRequired
+		}
+
+		// Create file header in the output ZIP archive
+		zf, err := zw.Create(header.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		// Stream decompressed/decrypted contents to the ZIP writer
+		_, err = io.Copy(zf, rr)
+		if errors.Is(err, rardecode.ErrArchiveEncrypted) || errors.Is(err, rardecode.ErrArchivedFileEncrypted) {
+			return nil, ErrPasswordRequired
+		}
+		if errors.Is(err, rardecode.ErrBadPassword) {
+			return nil, ErrPasswordIncorrect
+		}
+		if err != nil {
+			return nil, err
+		}
 	}
-	f2.Write([]byte("ID,Name,Status\n1,RAR Decryption,Success\n2,WebAssembly,Active\n"))
 
 	err = zw.Close()
 	if err != nil {

@@ -3,6 +3,7 @@ package document
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"strconv"
 	"strings"
@@ -162,7 +163,9 @@ func convertPdfToXls(data []byte) ([]byte, error) {
 					styleAttr = " s=\"2\""
 				}
 
-				rows.WriteString(fmt.Sprintf("<c r=\"%s%d\" t=\"inlineStr\"%s><is><t>%s</t></is></c>", colLetter, rowIdx, styleAttr, val))
+				var escaped bytes.Buffer
+				xml.EscapeText(&escaped, []byte(val))
+				rows.WriteString(fmt.Sprintf("<c r=\"%s%d\" t=\"inlineStr\"%s><is><t>%s</t></is></c>", colLetter, rowIdx, styleAttr, escaped.String()))
 			}
 			rows.WriteString("</row>")
 			rowIdx++

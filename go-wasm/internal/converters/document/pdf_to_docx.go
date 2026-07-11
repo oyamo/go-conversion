@@ -3,6 +3,7 @@ package document
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"strings"
 	"go-wasm/internal/registry"
@@ -51,8 +52,11 @@ func convertPdfToDocx(data []byte) ([]byte, error) {
 	var paragraphs bytes.Buffer
 	lines := strings.Split(text, "\n")
 	for _, line := range lines {
-		if len(strings.TrimSpace(line)) > 0 {
-			paragraphs.WriteString(fmt.Sprintf("<w:p><w:r><w:t>%s</w:t></w:r></w:p>", line))
+		trimmed := strings.TrimSpace(line)
+		if len(trimmed) > 0 {
+			var escaped bytes.Buffer
+			xml.EscapeText(&escaped, []byte(trimmed))
+			paragraphs.WriteString(fmt.Sprintf("<w:p><w:r><w:t>%s</w:t></w:r></w:p>", escaped.String()))
 		}
 	}
 
